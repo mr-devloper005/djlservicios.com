@@ -37,7 +37,7 @@ export function NavbarAuthControls() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="sm" className="hidden h-10 gap-1 rounded-full bg-[#AE2448] px-4 text-white shadow-[0_16px_30px_rgba(174,36,72,0.24)] hover:bg-[#8e1b3b] sm:flex">
+          <Button size="sm" className="hidden h-10 gap-1 rounded-full bg-primary px-4 text-primary-foreground shadow-md hover:bg-primary/90 sm:flex">
             <Plus className="h-4 w-4" />
             Create
             <ChevronDown className="h-3 w-3" />
@@ -60,7 +60,7 @@ export function NavbarAuthControls() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative rounded-full text-[#5f4750] hover:bg-[rgba(110,26,55,0.06)] hover:text-[#8f1f3f]">
+          <Button variant="ghost" size="icon" className="relative rounded-full text-inherit hover:bg-white/10 hover:text-inherit">
             <Bell className="h-5 w-5" />
             <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-[#72BAA9] p-0 text-[10px] text-[#10211c]">
               3

@@ -1,10 +1,10 @@
 export const siteIdentity = {
-  code: process.env.NEXT_PUBLIC_SITE_CODE || 'djlservicios',
+  code: process.env.NEXT_PUBLIC_SITE_CODE || 'dj6x4q8m2v',
   name: process.env.NEXT_PUBLIC_SITE_NAME || 'DJL Servicios',
-  tagline: process.env.NEXT_PUBLIC_SITE_TAGLINE || 'Business listing platform',
+  tagline: process.env.NEXT_PUBLIC_SITE_TAGLINE || 'Local classifieds & services',
   description:
     process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
-    'A listing-first business discovery platform for browsing services, businesses, spaces, and location-based opportunities through a cleaner browsing experience.',
+    'Post and browse real classified ads in your area: home services, jobs, items for sale, rentals, and local deals. Search by keyword, filter by category, and contact sellers directly from each listing.',
   domain: process.env.NEXT_PUBLIC_SITE_DOMAIN || 'djlservicios.com',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://djlservicios.com',
   ogImage: process.env.NEXT_PUBLIC_SITE_OG_IMAGE || '/og-default.png',

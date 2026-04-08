@@ -1,6 +1,6 @@
 import { ContentImage } from '@/components/shared/content-image'
 import Link from 'next/link'
-import { ArrowUpRight, ExternalLink, FileText, Mail, MapPin, Tag } from 'lucide-react'
+import { ArrowUpRight, ExternalLink, FileText, Mail, MapPin, Sparkles, Tag } from 'lucide-react'
 import type { SitePost } from '@/lib/site-connector'
 import { CATEGORY_OPTIONS, normalizeCategory } from '@/lib/categories'
 import type { TaskKey } from '@/lib/site-config'
@@ -12,6 +12,7 @@ type ListingContent = {
   category?: string
   description?: string
   email?: string
+  price?: string | number
 }
 
 const stripHtml = (value?: string | null) =>
@@ -32,6 +33,25 @@ const getExcerpt = (value?: string | null, maxLength = 140) => {
 const getContent = (post: SitePost): ListingContent => {
   const content = post.content && typeof post.content === 'object' ? post.content : {}
   return content as ListingContent
+}
+
+const formatPrice = (content: Record<string, unknown>) => {
+  const raw = content.price ?? content.asking_price ?? content.amount
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(raw)
+  }
+  if (typeof raw === 'string' && raw.trim()) return raw.trim()
+  return null
+}
+
+const listedFreshness = (publishedAt?: string | null) => {
+  if (!publishedAt) return null
+  const t = new Date(publishedAt).getTime()
+  if (!Number.isFinite(t)) return null
+  const days = (Date.now() - t) / (1000 * 60 * 60 * 24)
+  if (days < 2) return 'New'
+  if (days < 7) return 'This week'
+  return null
 }
 
 const getImageUrl = (post: SitePost, content: ListingContent) => {
@@ -73,10 +93,10 @@ const cardStyles = {
     badge: 'bg-[#8df0c8] text-[#07111f]',
   },
   'catalog-grid': {
-    frame: 'rounded-[1.8rem] border border-[rgba(67,78,41,0.14)] bg-[#f8faf1] shadow-[0_18px_58px_rgba(55,65,31,0.1)] hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(55,65,31,0.14)]',
-    muted: 'text-[#5b664c]',
-    title: 'text-[#1f2617]',
-    badge: 'bg-[#1f2617] text-[#edf5dc]',
+    frame: 'rounded-2xl border border-[color:var(--listing-card-border)] bg-card shadow-[0_20px_50px_rgba(29,23,22,0.08)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_28px_64px_rgba(29,23,22,0.12)]',
+    muted: 'text-muted-foreground',
+    title: 'text-foreground',
+    badge: 'bg-primary text-primary-foreground',
   },
 } as const
 
@@ -94,6 +114,9 @@ export function TaskPostCard({
   compact?: boolean
 }) {
   const content = getContent(post)
+  const contentRecord = (post.content && typeof post.content === 'object' ? post.content : {}) as Record<string, unknown>
+  const priceLabel = formatPrice(contentRecord)
+  const freshness = listedFreshness(post.publishedAt)
   const image = getImageUrl(post, content)
   const rawCategory = content.category || post.tags?.[0] || 'Post'
   const normalizedCategory = normalizeCategory(rawCategory)
@@ -112,45 +135,70 @@ export function TaskPostCard({
   if (isDirectorySurface) {
     const cardTone = recipe.brandPack === 'market-utility'
       ? {
-          frame: 'rounded-[1.75rem] border border-[#d7deca] bg-white shadow-[0_18px_44px_rgba(64,76,34,0.08)] hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(64,76,34,0.14)]',
-          badge: 'bg-[#1f2617] text-[#edf5dc]',
-          muted: 'text-[#5b664c]',
-          title: 'text-[#1f2617]',
-          cta: 'text-[#1f2617]',
+          frame: 'rounded-2xl border border-[color:var(--listing-card-border)] bg-card shadow-[0_22px_56px_rgba(29,23,22,0.09)] ring-1 ring-[color:var(--listing-card-glow)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_32px_72px_rgba(29,23,22,0.14)]',
+          badge: 'bg-[#402a23] text-[#f3bc77]',
+          muted: 'text-muted-foreground',
+          title: 'text-[#1d1716]',
+          cta: 'bg-[#a55233] text-[#fffefb]',
+          price: 'bg-[#f3bc77] text-[#1d1716]',
         }
       : {
-          frame: 'rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_44px_rgba(15,23,42,0.08)] hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(15,23,42,0.14)]',
-          badge: 'bg-slate-950 text-white',
-          muted: 'text-slate-600',
-          title: 'text-slate-950',
-          cta: 'text-slate-950',
+          frame: 'rounded-2xl border border-border bg-card shadow-[0_18px_44px_rgba(15,23,42,0.08)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(15,23,42,0.14)]',
+          badge: 'bg-primary text-primary-foreground',
+          muted: 'text-muted-foreground',
+          title: 'text-foreground',
+          cta: 'bg-primary text-primary-foreground',
+          price: 'bg-accent text-accent-foreground',
         }
 
     return (
-      <Link href={href} className={`group flex h-full flex-col overflow-hidden transition duration-300 ${cardTone.frame}`}>
-        <div className="relative aspect-[16/11] overflow-hidden bg-slate-100">
-          <ContentImage src={image} alt={altText} fill sizes={imageSizes} quality={75} className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" intrinsicWidth={960} intrinsicHeight={720} />
-          <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
-            <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${cardTone.badge}`}>
-              <Tag className="h-3.5 w-3.5" />
+      <Link href={href} className={`group relative flex h-full flex-col overflow-hidden ${cardTone.frame}`}>
+        <div className="relative aspect-[5/4] overflow-hidden bg-muted sm:aspect-[16/11]">
+          <ContentImage src={image} alt={altText} fill sizes={imageSizes} quality={75} className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.045]" intrinsicWidth={960} intrinsicHeight={720} />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1d1716]/55 via-[#1d1716]/10 to-transparent opacity-90" />
+          <div className="absolute left-3 top-3 flex flex-wrap items-center gap-2 sm:left-4 sm:top-4">
+            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] shadow-sm ${cardTone.badge}`}>
+              <Tag className="h-3 w-3" />
               {category}
             </span>
-            <span className="rounded-full bg-white/85 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-900">
-              {variant === 'classified' ? 'Open now' : 'Verified'}
+            {freshness ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/92 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#a55233] shadow-sm">
+                <Sparkles className="h-3 w-3" />
+                {freshness}
+              </span>
+            ) : null}
+          </div>
+          <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2 sm:bottom-4 sm:left-4 sm:right-4">
+            {priceLabel ? (
+              <span className={`rounded-lg px-3 py-1.5 text-lg font-semibold tabular-nums shadow-md sm:text-xl ${cardTone.price}`}>
+                {priceLabel}
+              </span>
+            ) : (
+              <span className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[#faf3eb] ring-1 ring-white/25`}>
+                {variant === 'classified' ? 'Ask for price' : 'View terms'}
+              </span>
+            )}
+            <span className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#402a23] shadow-sm">
+              {variant === 'classified' ? 'Classified' : 'Verified'}
             </span>
           </div>
         </div>
-        <div className="flex flex-1 flex-col p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className={`line-clamp-2 text-xl font-semibold leading-snug ${cardTone.title}`}>{post.title}</h3>
-            <ArrowUpRight className={`h-5 w-5 shrink-0 ${cardTone.muted}`} />
+        <div className="flex flex-1 flex-col border-t border-[color:var(--listing-card-border)] bg-gradient-to-b from-card to-secondary/40 p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className={`font-display line-clamp-2 text-lg font-semibold leading-snug tracking-tight sm:text-xl ${cardTone.title}`}>{post.title}</h3>
+            <ArrowUpRight className={`mt-0.5 h-5 w-5 shrink-0 opacity-60 transition-opacity group-hover:opacity-100 ${cardTone.muted}`} />
           </div>
-          <p className={`mt-3 line-clamp-3 text-sm leading-7 ${cardTone.muted}`}>{getExcerpt(content.description || post.summary) || 'Explore this local listing.'}</p>
-          <div className="mt-5 flex flex-wrap gap-3 text-xs">
-            {content.location ? <span className={`inline-flex items-center gap-1 ${cardTone.muted}`}><MapPin className="h-3.5 w-3.5" />{content.location}</span> : null}
-            {content.email ? <span className={`inline-flex items-center gap-1 ${cardTone.muted}`}><Mail className="h-3.5 w-3.5" />{content.email}</span> : null}
+          <p className={`mt-2 line-clamp-2 text-sm leading-relaxed ${cardTone.muted}`}>{getExcerpt(content.description || post.summary, 110) || 'Tap through for the full description and contact path.'}</p>
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+            {content.location ? <span className={`inline-flex items-center gap-1 ${cardTone.muted}`}><MapPin className="h-3.5 w-3.5 shrink-0 text-[#a55233]" />{content.location}</span> : null}
+            {content.email ? <span className={`inline-flex max-w-[200px] items-center gap-1 truncate ${cardTone.muted}`}><Mail className="h-3.5 w-3.5 shrink-0 text-[#a55233]" />{content.email}</span> : null}
           </div>
-          <div className={`mt-auto pt-5 text-sm font-semibold ${cardTone.cta}`}>{variant === 'classified' ? 'View offer' : 'View details'}</div>
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-dashed border-border/80 pt-4">
+            <span className={`text-xs font-semibold uppercase tracking-[0.2em] ${cardTone.muted}`}>Listing</span>
+            <span className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200 group-hover:brightness-110 ${cardTone.cta}`}>
+              {variant === 'classified' ? 'View listing' : 'View details'}
+            </span>
+          </div>
         </div>
       </Link>
     )

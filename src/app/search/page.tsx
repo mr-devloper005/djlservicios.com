@@ -6,6 +6,7 @@ import { fetchSiteFeed } from "@/lib/site-connector";
 import { buildPostUrl, getPostTaskKey } from "@/lib/task-data";
 import { getMockPostsForTask } from "@/lib/mock-posts";
 import { SITE_CONFIG } from "@/lib/site-config";
+import { siteContent } from "@/config/site.content";
 import { TaskPostCard } from "@/components/shared/task-post-card";
 
 export const revalidate = 3;
@@ -72,12 +73,8 @@ export default async function SearchPage({
 
   return (
     <PageShell
-      title="Search"
-      description={
-        query
-          ? `Results for "${query}"`
-          : "Browse the latest posts across every task."
-      }
+      title={siteContent.searchPage.title}
+      description={query ? siteContent.searchPage.withQueryDescription(query) : siteContent.searchPage.emptyBrowseDescription}
       actions={
         <form action="/search" className="flex w-full gap-2 sm:w-auto">
           <input type="hidden" name="master" value="1" />
@@ -88,12 +85,12 @@ export default async function SearchPage({
             <Input
               name="q"
               defaultValue={query}
-              placeholder="Search across tasks..."
+              placeholder={siteContent.nav.searchPlaceholder}
               className="h-11 pl-9"
             />
           </div>
           <Button type="submit" className="h-11">
-            Search
+            {siteContent.nav.searchSubmit}
           </Button>
         </form>
       }
@@ -107,8 +104,9 @@ export default async function SearchPage({
           })}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
-          No matching posts yet.
+        <div className="rounded-2xl border border-dashed border-[color:var(--listing-card-border)] bg-card/40 px-8 py-14 text-center">
+          <p className="font-display text-lg font-semibold text-foreground">No ads match that search</p>
+          <p className="mt-2 text-sm text-muted-foreground">Try different keywords, clear filters, or browse the latest classifieds.</p>
         </div>
       )}
     </PageShell>

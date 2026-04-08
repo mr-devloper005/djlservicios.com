@@ -1,18 +1,19 @@
-import { Building2, FileText, Image as ImageIcon, Mail, MapPin, Phone, Sparkles, Bookmark } from 'lucide-react'
+import { Building2, FileText, Image as ImageIcon, Mail, Phone, Sparkles, Bookmark, Tag } from 'lucide-react'
 import { NavbarShell } from '@/components/shared/navbar-shell'
 import { Footer } from '@/components/shared/footer'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { siteContent } from '@/config/site.content'
 import { getFactoryState } from '@/design/factory/get-factory-state'
 import { getProductKind } from '@/design/factory/get-product-kind'
 
 function getTone(kind: ReturnType<typeof getProductKind>) {
   if (kind === 'directory') {
     return {
-      shell: 'bg-[#f8fbff] text-slate-950',
-      panel: 'border border-slate-200 bg-white',
-      soft: 'border border-slate-200 bg-slate-50',
-      muted: 'text-slate-600',
-      action: 'bg-slate-950 text-white hover:bg-slate-800',
+      shell: 'bg-background text-foreground',
+      panel: 'paper-panel border border-[color:var(--listing-card-border)]',
+      soft: 'rounded-2xl border border-[color:var(--listing-card-border)] bg-card/90',
+      muted: 'text-muted-foreground',
+      action: 'bg-[#a55233] text-[#fffefb] hover:bg-[#8e4529]',
     }
   }
   if (kind === 'editorial') {
@@ -46,13 +47,14 @@ export default function ContactPage() {
   const { recipe } = getFactoryState()
   const productKind = getProductKind(recipe)
   const tone = getTone(productKind)
+  const directoryLaneIcons = [Tag, Mail, Phone] as const
   const lanes =
     productKind === 'directory'
-      ? [
-          { icon: Building2, title: 'Business onboarding', body: 'Add listings, verify operational details, and bring your business surface live quickly.' },
-          { icon: Phone, title: 'Partnership support', body: 'Talk through bulk publishing, local growth, and operational setup questions.' },
-          { icon: MapPin, title: 'Coverage requests', body: 'Need a new geography or category lane? We can shape the directory around it.' },
-        ]
+      ? siteContent.contact.directoryLanes.map((lane, i) => ({
+          icon: directoryLaneIcons[i] || Building2,
+          title: lane.title,
+          body: lane.body,
+        }))
       : productKind === 'editorial'
         ? [
             { icon: FileText, title: 'Editorial submissions', body: 'Pitch essays, columns, and long-form ideas that fit the publication.' },
@@ -78,8 +80,12 @@ export default function ContactPage() {
         <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] opacity-70">Contact {SITE_CONFIG.name}</p>
-            <h1 className="mt-4 text-5xl font-semibold tracking-[-0.05em]">A support page that matches the product, not a generic contact form.</h1>
-            <p className={`mt-5 max-w-2xl text-sm leading-8 ${tone.muted}`}>Tell us what you are trying to publish, fix, or launch. We will route it through the right lane instead of forcing every request into the same support bucket.</p>
+            <h1 className="font-display mt-4 text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">
+              {productKind === 'directory' ? siteContent.contact.directoryTitle : 'Get in touch'}
+            </h1>
+            <p className={`mt-5 max-w-2xl text-sm leading-relaxed ${tone.muted}`}>
+              {productKind === 'directory' ? siteContent.contact.directoryLead : 'Tell us what you need and we will point you in the right direction.'}
+            </p>
             <div className="mt-8 space-y-4">
               {lanes.map((lane) => (
                 <div key={lane.title} className={`rounded-[1.6rem] p-5 ${tone.soft}`}>
@@ -92,13 +98,16 @@ export default function ContactPage() {
           </div>
 
           <div className={`rounded-[2rem] p-7 ${tone.panel}`}>
-            <h2 className="text-2xl font-semibold">Send a message</h2>
+            <h2 className="font-display text-2xl font-semibold text-foreground">{siteContent.contact.formTitle}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{siteContent.contact.formNote}</p>
             <form className="mt-6 grid gap-4">
-              <input className="h-12 rounded-xl border border-current/10 bg-transparent px-4 text-sm" placeholder="Your name" />
-              <input className="h-12 rounded-xl border border-current/10 bg-transparent px-4 text-sm" placeholder="Email address" />
-              <input className="h-12 rounded-xl border border-current/10 bg-transparent px-4 text-sm" placeholder="What do you need help with?" />
-              <textarea className="min-h-[180px] rounded-2xl border border-current/10 bg-transparent px-4 py-3 text-sm" placeholder="Share the full context so we can respond with the right next step." />
-              <button type="submit" className={`inline-flex h-12 items-center justify-center rounded-full px-6 text-sm font-semibold ${tone.action}`}>Send message</button>
+              <input className="h-12 rounded-xl border border-border bg-background px-4 text-sm" placeholder="Your name" name="name" autoComplete="name" />
+              <input className="h-12 rounded-xl border border-border bg-background px-4 text-sm" placeholder="Email address" name="email" type="email" autoComplete="email" />
+              <input className="h-12 rounded-xl border border-border bg-background px-4 text-sm" placeholder="Subject (e.g. problem with my ad)" name="subject" />
+              <textarea className="min-h-[180px] rounded-xl border border-border bg-background px-4 py-3 text-sm" placeholder="Describe your question or issue. Include your ad title if it is about a listing." name="message" />
+              <button type="submit" className={`inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold ${tone.action}`}>
+                Send message
+              </button>
             </form>
           </div>
         </section>

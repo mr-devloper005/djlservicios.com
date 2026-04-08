@@ -7,7 +7,7 @@ import { SchemaJsonLd } from '@/components/seo/schema-jsonld'
 import { fetchTaskPosts } from '@/lib/task-data'
 import { SITE_CONFIG, getTaskConfig, type TaskKey } from '@/lib/site-config'
 import { CATEGORY_OPTIONS, normalizeCategory } from '@/lib/categories'
-import { taskIntroCopy } from '@/config/site.content'
+import { siteContent, taskIntroCopy } from '@/config/site.content'
 import { getFactoryState } from '@/design/factory/get-factory-state'
 
 const taskIcons: Record<TaskKey, any> = {
@@ -32,8 +32,8 @@ const variantShells = {
   'image-portfolio': 'bg-[linear-gradient(180deg,#07111f_0%,#13203a_100%)] text-white',
   'profile-creator': 'bg-[linear-gradient(180deg,#0a1120_0%,#101c34_100%)] text-white',
   'profile-business': 'bg-[linear-gradient(180deg,#f6fbff_0%,#ffffff_100%)]',
-  'classified-bulletin': 'bg-[linear-gradient(180deg,#edf3e4_0%,#ffffff_100%)]',
-  'classified-market': 'bg-[linear-gradient(180deg,#f4f6ef_0%,#ffffff_100%)]',
+  'classified-bulletin': 'bg-[linear-gradient(180deg,#faf6f1_0%,#f0e8df_55%,#faf6f1_100%)]',
+  'classified-market': 'bg-[linear-gradient(180deg,#faf6f1_0%,#efe9e2_50%,#faf6f1_100%)]',
   'sbm-curation': 'bg-[linear-gradient(180deg,#fff7ee_0%,#ffffff_100%)]',
   'sbm-library': 'bg-[linear-gradient(180deg,#f7f8fc_0%,#ffffff_100%)]',
 } as const
@@ -56,6 +56,7 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
   const Icon = taskIcons[task] || LayoutGrid
 
   const isDark = ['image-masonry', 'image-portfolio', 'profile-creator'].includes(layoutKey)
+  const isClassifiedLane = layoutKey === 'classified-market' || layoutKey === 'classified-bulletin'
   const ui = isDark
     ? {
         muted: 'text-slate-300',
@@ -72,13 +73,21 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
           input: 'border border-[#dbc6b6] bg-white text-[#2f1d16]',
           button: 'bg-[#2f1d16] text-[#fff4e4] hover:bg-[#452920]',
         }
-      : {
-          muted: 'text-slate-600',
-          panel: 'border border-slate-200 bg-white',
-          soft: 'border border-slate-200 bg-slate-50',
-          input: 'border border-slate-200 bg-white text-slate-950',
-          button: 'bg-slate-950 text-white hover:bg-slate-800',
-        }
+      : isClassifiedLane
+        ? {
+            muted: 'text-muted-foreground',
+            panel: 'paper-panel border border-[color:var(--listing-card-border)]',
+            soft: 'rounded-2xl border border-[color:var(--listing-card-border)] bg-card/95 shadow-sm',
+            input: 'rounded-xl border border-[color:var(--listing-card-border)] bg-card text-foreground',
+            button: 'bg-[#a55233] text-[#fffefb] hover:bg-[#8e4529]',
+          }
+        : {
+            muted: 'text-slate-600',
+            panel: 'border border-slate-200 bg-white',
+            soft: 'border border-slate-200 bg-slate-50',
+            input: 'border border-slate-200 bg-white text-slate-950',
+            button: 'bg-slate-950 text-white hover:bg-slate-800',
+          }
 
   return (
     <div className={`min-h-screen ${shellClass}`}>
@@ -195,15 +204,23 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
         ) : null}
 
         {layoutKey === 'classified-bulletin' || layoutKey === 'classified-market' ? (
-          <section className="mb-12 grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-            <div className={`rounded-[1.8rem] p-6 ${ui.panel}`}>
-              <p className={`text-xs uppercase tracking-[0.3em] ${ui.muted}`}>{taskConfig?.label || task}</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-foreground">Fast-moving notices, offers, and responses in a compact board format.</h1>
+          <section className="mb-12 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
+            <div className={`rounded-2xl p-7 shadow-[0_20px_56px_rgba(29,23,22,0.07)] ${ui.panel}`}>
+              <p className={`text-xs font-semibold uppercase tracking-[0.28em] ${ui.muted}`}>{taskConfig?.label || task}</p>
+              <h1 className="font-display mt-4 text-4xl font-semibold tracking-[-0.03em] text-foreground lg:text-5xl">{siteContent.classifiedIndex.heading}</h1>
+              <p className={`mt-5 max-w-xl text-sm leading-relaxed ${ui.muted}`}>{siteContent.classifiedIndex.subheading}</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/search" className={`inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold ${ui.button}`}>
+                  Search ads
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {['Quick to scan', 'Shorter response path', 'Clearer urgency cues'].map((item) => (
-                <div key={item} className={`rounded-[1.5rem] p-5 ${ui.soft}`}>
-                  <p className="text-sm font-semibold">{item}</p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {siteContent.classifiedIndex.pillars.map((pillar) => (
+                <div key={pillar.title} className={`rounded-2xl p-5 ${ui.soft}`}>
+                  <p className="font-display text-base font-semibold text-foreground">{pillar.title}</p>
+                  <p className={`mt-2 text-sm leading-relaxed ${ui.muted}`}>{pillar.body}</p>
                 </div>
               ))}
             </div>

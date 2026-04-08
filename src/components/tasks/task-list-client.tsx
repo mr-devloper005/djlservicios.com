@@ -54,14 +54,15 @@ export function TaskListClient({ task, initialPosts, category }: Props) {
 
   if (!merged.length) {
     return (
-      <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
-        No posts yet for this section.
+      <div className="rounded-2xl border border-dashed border-[color:var(--listing-card-border)] bg-card/50 px-8 py-16 text-center shadow-inner shadow-black/[0.02]">
+        <p className="font-display text-lg font-semibold text-foreground">Nothing listed here yet</p>
+        <p className="mt-2 text-sm text-muted-foreground">New classifieds will appear in this grid as soon as they are published.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {merged.map((post) => {
         const localOnly = (post as any).localOnly;
         const href = localOnly
