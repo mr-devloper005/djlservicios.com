@@ -2,17 +2,19 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Bookmark, Building2, Compass, FileText, Globe2, Image as ImageIcon, LayoutGrid, MapPin, ShieldCheck, Tag, User } from 'lucide-react'
 import { ContentImage } from '@/components/shared/content-image'
+import { SiteSearchForm } from '@/components/shared/site-search-form'
 import { NavbarShell } from '@/components/shared/navbar-shell'
 import { Footer } from '@/components/shared/footer'
 import { SchemaJsonLd } from '@/components/seo/schema-jsonld'
 import { TaskPostCard } from '@/components/shared/task-post-card'
-import { SITE_CONFIG, type TaskKey } from '@/lib/site-config'
+import { SITE_CONFIG, getTaskConfig, type TaskKey } from '@/lib/site-config'
 import { buildPageMetadata } from '@/lib/seo'
 import { fetchTaskPosts } from '@/lib/task-data'
 import { siteContent } from '@/config/site.content'
 import { getFactoryState } from '@/design/factory/get-factory-state'
 import { getProductKind, type ProductKind } from '@/design/factory/get-product-kind'
 import type { SitePost } from '@/lib/site-connector'
+import { cn } from '@/lib/utils'
 
 export const revalidate = 300
 
@@ -148,6 +150,7 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
   const tone = getDirectoryTone(brandPack)
   const featuredListings = (listingPosts.length ? listingPosts : classifiedPosts).slice(0, 3)
   const featuredTaskKey: TaskKey = listingPosts.length ? 'listing' : 'classified'
+  const featuredTaskRoute = getTaskConfig(featuredTaskKey)?.route || '/classifieds'
   const quickRoutes = enabledTasks.slice(0, 4)
 
   return (
@@ -165,10 +168,20 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
               </h1>
               <p className={`mt-6 max-w-2xl text-base leading-8 ${tone.muted}`}>{SITE_CONFIG.description}</p>
 
-              <div className={`mt-8 grid gap-3 rounded-[2rem] p-4 ${tone.panel} md:grid-cols-[1.25fr_0.8fr_auto]`}>
-                <div className="rounded-full bg-black/5 px-4 py-3 text-sm">What do you need today?</div>
-                <div className="rounded-full bg-black/5 px-4 py-3 text-sm">Choose area or city</div>
-                <Link href={primaryTask?.route || '/listings'} className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold ${tone.action}`}>
+              <div className={`mt-8 flex flex-col gap-3 rounded-[2rem] p-4 ${tone.panel} md:flex-row md:items-stretch`}>
+                <SiteSearchForm
+                  className="min-w-0 flex-1"
+                  formClassName="flex-1 rounded-[999px] border border-black/10 bg-black/[0.04] px-2 py-1.5"
+                  inputClassName="h-11 text-sm text-foreground placeholder:text-foreground"
+                  textSubmit
+                  buttonLabel="Search"
+                  buttonClassName={cn('h-11 shrink-0 rounded-full px-5 text-sm font-semibold', tone.action)}
+                  placeholder="What do you need today?"
+                />
+                <Link
+                  href={primaryTask?.route || '/listings'}
+                  className={`inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-sm font-semibold md:self-auto ${tone.actionAlt}`}
+                >
                   Browse now
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -200,18 +213,20 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
                 <p className={`mt-4 text-sm leading-7 ${tone.muted}`}>{primaryTask?.description || 'Structured discovery for services, offers, and business surfaces.'}</p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                {quickRoutes.map((task) => {
-                  const Icon = taskIcons[task.key as TaskKey] || LayoutGrid
-                  return (
-                    <Link key={task.key} href={task.route} className={`rounded-[1.6rem] p-5 ${tone.soft}`}>
-                      <Icon className="h-5 w-5" />
-                      <h3 className="mt-4 text-lg font-semibold">{task.label}</h3>
-                      <p className={`mt-2 text-sm leading-7 ${tone.muted}`}>{task.description}</p>
-                    </Link>
-                  )
-                })}
-              </div>
+              {enabledTasks.length > 1 ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {quickRoutes.map((task) => {
+                    const Icon = taskIcons[task.key as TaskKey] || LayoutGrid
+                    return (
+                      <Link key={task.key} href={task.route} className={`rounded-[1.6rem] p-5 ${tone.soft}`}>
+                        <Icon className="h-5 w-5" />
+                        <h3 className="mt-4 text-lg font-semibold">{task.label}</h3>
+                        <p className={`mt-2 text-sm leading-7 ${tone.muted}`}>{task.description}</p>
+                      </Link>
+                    )
+                  })}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -223,7 +238,9 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Featured businesses</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">Strong listings with clearer trust cues.</h2>
           </div>
-          <Link href="/listings" className="text-sm font-semibold text-primary hover:opacity-80">Open listings</Link>
+          <Link href={featuredTaskRoute} className="text-sm font-semibold text-primary hover:opacity-80">
+            View all {getTaskConfig(featuredTaskKey)?.label ?? 'posts'}
+          </Link>
         </div>
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           {featuredListings.map((post) => (
