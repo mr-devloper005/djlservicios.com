@@ -5,7 +5,9 @@ import Link from "next/link";
 import { ArrowRight, Compass, Search, Sparkles, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ContentImage } from "@/components/shared/content-image";
+import { SiteSearchForm } from "@/components/shared/site-search-form";
 import { SITE_CONFIG, type TaskConfig } from "@/lib/site-config";
+import { cn } from "@/lib/utils";
 import { siteContent } from "@/config/site.content";
 import { SITE_THEME } from "@/config/site.theme";
 
@@ -116,6 +118,15 @@ export function HeroSection({ images, tasks }: { images: string[]; tasks: TaskCo
               <Button asChild size="lg" variant="outline" className={`rounded-full px-6 ${palette.secondary}`}>
                 <Link href={siteContent.hero.secondaryCta.href}>{siteContent.hero.secondaryCta.label}</Link>
               </Button>
+            </div>
+
+            <div className="mt-6 max-w-2xl">
+              <SiteSearchForm
+                formClassName={cn("rounded-[1.6rem] border px-2 py-1.5", palette.card)}
+                inputClassName="h-11 text-base text-current placeholder:text-current/60"
+                buttonClassName={cn("h-11 w-11 text-current hover:opacity-90", palette.primary)}
+                placeholder={siteContent.hero.searchPlaceholder}
+              />
             </div>
 
             <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-[1.1fr_0.9fr]">
