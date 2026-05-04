@@ -43,12 +43,6 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
   const posts = await fetchTaskPosts(task, 30)
   const normalizedCategory = category ? normalizeCategory(category) : 'all'
   const intro = taskIntroCopy[task]
-  const introLinksVisible = intro.links.filter((link) => {
-    const path = link.href.split('?')[0].split('#')[0]
-    return SITE_CONFIG.tasks.some(
-      (t) => t.enabled && (path === t.route || path.startsWith(`${t.route}/`)),
-    )
-  })
   const baseUrl = SITE_CONFIG.baseUrl.replace(/\/$/, '')
   const schemaItems = posts.slice(0, 10).map((post, index) => ({
     '@type': 'ListItem',
@@ -261,13 +255,11 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
             {intro.paragraphs.map((paragraph) => (
               <p key={paragraph.slice(0, 40)} className={`mt-4 text-sm leading-7 ${ui.muted}`}>{paragraph}</p>
             ))}
-            {introLinksVisible.length ? (
-              <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                {introLinksVisible.map((link) => (
-                  <a key={link.href} href={link.href} className="font-semibold text-foreground hover:underline">{link.label}</a>
-                ))}
-              </div>
-            ) : null}
+            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+              {intro.links.map((link) => (
+                <a key={link.href} href={link.href} className="font-semibold text-foreground hover:underline">{link.label}</a>
+              ))}
+            </div>
           </section>
         ) : null}
 

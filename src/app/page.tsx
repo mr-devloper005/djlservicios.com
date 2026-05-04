@@ -1,20 +1,21 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, Bookmark, Building2, Compass, FileText, Globe2, Image as ImageIcon, LayoutGrid, MapPin, ShieldCheck, Tag, User } from 'lucide-react'
+import { ArrowRight, Bookmark, Building2, Compass, FileText, Globe2, Image as ImageIcon, LayoutGrid, ShieldCheck, Tag, User } from 'lucide-react'
 import { ContentImage } from '@/components/shared/content-image'
-import { SiteSearchForm } from '@/components/shared/site-search-form'
 import { NavbarShell } from '@/components/shared/navbar-shell'
 import { Footer } from '@/components/shared/footer'
 import { SchemaJsonLd } from '@/components/seo/schema-jsonld'
 import { TaskPostCard } from '@/components/shared/task-post-card'
-import { SITE_CONFIG, getTaskConfig, type TaskKey } from '@/lib/site-config'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { SITE_CONFIG, type TaskKey } from '@/lib/site-config'
 import { buildPageMetadata } from '@/lib/seo'
 import { fetchTaskPosts } from '@/lib/task-data'
 import { siteContent } from '@/config/site.content'
+import { CATEGORY_OPTIONS } from '@/lib/categories'
 import { getFactoryState } from '@/design/factory/get-factory-state'
 import { getProductKind, type ProductKind } from '@/design/factory/get-product-kind'
 import type { SitePost } from '@/lib/site-connector'
-import { cn } from '@/lib/utils'
 
 export const revalidate = 300
 
@@ -76,15 +77,16 @@ function getPostMeta(post?: SitePost | null) {
 function getDirectoryTone(brandPack: string) {
   if (brandPack === 'market-utility') {
     return {
-      shell: 'bg-[#f5f7f1] text-[#1f2617]',
-      hero: 'bg-[linear-gradient(180deg,#eef4e4_0%,#f8faf4_100%)]',
-      panel: 'border border-[#d5ddc8] bg-white shadow-[0_24px_64px_rgba(64,76,34,0.08)]',
-      soft: 'border border-[#d5ddc8] bg-[#eff3e7]',
-      muted: 'text-[#5b664c]',
-      title: 'text-[#1f2617]',
-      badge: 'bg-[#1f2617] text-[#edf5dc]',
-      action: 'bg-[#1f2617] text-[#edf5dc] hover:bg-[#2f3a24]',
-      actionAlt: 'border border-[#d5ddc8] bg-white text-[#1f2617] hover:bg-[#eef3e7]',
+      shell: 'bg-[#efe9e2] text-[#1d1716]',
+      hero: 'surface-hero-dark relative overflow-hidden',
+      panel: 'paper-panel rounded-[2rem]',
+      soft: 'rounded-2xl border border-[color:var(--listing-card-border)] bg-card/95 shadow-[0_12px_40px_rgba(29,23,22,0.06)]',
+      muted: 'text-[#6b5c54]',
+      title: 'text-[#f3bc77]',
+      titleOnLight: 'text-[#1d1716]',
+      badge: 'bg-[#f3bc77] text-[#1d1716]',
+      action: 'bg-[#a55233] text-[#fffefb] shadow-md shadow-[#a55233]/25 transition hover:bg-[#8e4529]',
+      actionAlt: 'border border-[#f3bc77]/55 bg-transparent text-[#f3bc77] transition hover:bg-[#f3bc77]/12',
     }
   }
   return {
@@ -94,6 +96,7 @@ function getDirectoryTone(brandPack: string) {
     soft: 'border border-slate-200 bg-slate-50',
     muted: 'text-slate-600',
     title: 'text-slate-950',
+    titleOnLight: 'text-slate-950',
     badge: 'bg-slate-950 text-white',
     action: 'bg-slate-950 text-white hover:bg-slate-800',
     actionAlt: 'border border-slate-200 bg-white text-slate-950 hover:bg-slate-100',
@@ -148,101 +151,169 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
   brandPack: string
 }) {
   const tone = getDirectoryTone(brandPack)
-  const featuredListings = (listingPosts.length ? listingPosts : classifiedPosts).slice(0, 3)
+  const featuredListings = (listingPosts.length ? listingPosts : classifiedPosts).slice(0, 6)
   const featuredTaskKey: TaskKey = listingPosts.length ? 'listing' : 'classified'
-  const featuredTaskRoute = getTaskConfig(featuredTaskKey)?.route || '/classifieds'
+  const sourcePosts = listingPosts.length ? listingPosts : classifiedPosts
   const quickRoutes = enabledTasks.slice(0, 4)
+  const isPremiumMarket = brandPack === 'market-utility'
+  const listingsHref = primaryTask?.route || '/classifieds'
+  const dh = siteContent.directoryHome
 
   return (
     <main>
       <section className={tone.hero}>
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-18">
-          <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full bg-[#a55233]/20 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-16 bottom-20 h-56 w-56 rounded-full bg-[#f3bc77]/15 blur-3xl"
+        />
+        <div className="relative mx-auto max-w-7xl px-4 pb-28 pt-14 sm:px-6 sm:pb-32 sm:pt-16 lg:px-8 lg:pb-36">
+          <div className="grid gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
             <div>
               <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] ${tone.badge}`}>
                 <Compass className="h-3.5 w-3.5" />
-                Local discovery product
+                {dh.heroBadge}
               </span>
-              <h1 className={`mt-6 max-w-4xl text-5xl font-semibold tracking-[-0.06em] sm:text-6xl ${tone.title}`}>
-                Search businesses, compare options, and act fast without digging through generic feeds.
+              <h1 className={`font-display mt-6 max-w-3xl text-4xl font-semibold leading-[1.08] tracking-[-0.03em] sm:text-5xl lg:text-[3.25rem] ${tone.title}`}>
+                {dh.heroTitle}
               </h1>
-              <p className={`mt-6 max-w-2xl text-base leading-8 ${tone.muted}`}>{SITE_CONFIG.description}</p>
+              <p className="mt-6 max-w-2xl text-base leading-relaxed text-[#d8cec6]">{SITE_CONFIG.description}</p>
 
-              <div className={`mt-8 flex flex-col gap-3 rounded-[2rem] p-4 ${tone.panel} md:flex-row md:items-stretch`}>
-                <SiteSearchForm
-                  className="min-w-0 flex-1"
-                  formClassName="flex-1 rounded-[999px] border border-black/10 bg-black/[0.04] px-2 py-1.5"
-                  inputClassName="h-11 text-sm text-foreground placeholder:text-foreground"
-                  textSubmit
-                  buttonLabel="Search"
-                  buttonClassName={cn('h-11 shrink-0 rounded-full px-5 text-sm font-semibold', tone.action)}
-                  placeholder="What do you need today?"
-                />
-                <Link
-                  href={primaryTask?.route || '/listings'}
-                  className={`inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-sm font-semibold md:self-auto ${tone.actionAlt}`}
-                >
-                  Browse now
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href={listingsHref} className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold ${tone.action}`}>
+                  Browse classifieds
                   <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/search" className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold ${tone.actionAlt}`}>
+                  Search ads
                 </Link>
               </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {[
-                  ['Verified businesses', `${featuredListings.length || 3}+ highlighted surfaces`],
-                  ['Fast scan rhythm', 'More utility, less filler'],
-                  ['Action first', 'Call, visit, shortlist, compare'],
-                ].map(([label, value]) => (
-                  <div key={label} className={`rounded-[1.4rem] p-4 ${tone.soft}`}>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] opacity-70">{label}</p>
-                    <p className="mt-2 text-lg font-semibold">{value}</p>
+              <div className="mt-10 grid gap-3 sm:grid-cols-3">
+                {dh.heroStats.map(([label, value]) => (
+                  <div key={label} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur-sm">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#f3bc77]/85">{label}</p>
+                    <p className="mt-2 text-base font-semibold text-[#faf3eb]">{value}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="grid gap-4">
-              <div className={`rounded-[2rem] p-6 ${tone.panel}`}>
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] opacity-70">Primary lane</p>
-                    <h2 className="mt-2 text-3xl font-semibold">{primaryTask?.label || 'Listings'}</h2>
-                  </div>
-                  <ShieldCheck className="h-6 w-6" />
+            <div className="relative mx-auto grid max-w-md gap-5 lg:max-w-none">
+              <div className="relative aspect-square max-w-[320px] justify-self-end lg:max-w-none">
+                <div className="absolute inset-0 rounded-full border-2 border-[#f3bc77]/35 bg-gradient-to-br from-[#402a23]/80 to-[#1d1716]" />
+                <div className="absolute inset-4 overflow-hidden rounded-full ring-2 ring-[#a55233]/40">
+                  <ContentImage src={getPostImage(featuredListings[0])} alt={featuredListings[0] ? `${featuredListings[0].title} preview` : 'Featured listing preview'} fill className="object-cover opacity-95" />
                 </div>
-                <p className={`mt-4 text-sm leading-7 ${tone.muted}`}>{primaryTask?.description || 'Structured discovery for services, offers, and business surfaces.'}</p>
+                <span className="absolute -left-2 top-8 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#a55233] text-[#fffefb] shadow-lg">
+                  <Tag className="h-5 w-5" />
+                </span>
               </div>
-
-              {enabledTasks.length > 1 ? (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {quickRoutes.map((task) => {
-                    const Icon = taskIcons[task.key as TaskKey] || LayoutGrid
-                    return (
-                      <Link key={task.key} href={task.route} className={`rounded-[1.6rem] p-5 ${tone.soft}`}>
-                        <Icon className="h-5 w-5" />
-                        <h3 className="mt-4 text-lg font-semibold">{task.label}</h3>
-                        <p className={`mt-2 text-sm leading-7 ${tone.muted}`}>{task.description}</p>
-                      </Link>
-                    )
-                  })}
+              <div className="relative aspect-square max-w-[280px] justify-self-start lg:-mt-24">
+                <div className="absolute inset-0 rounded-full border-2 border-[#f3bc77]/25 bg-gradient-to-tr from-[#2a211e] to-[#402a23]/90" />
+                <div className="absolute inset-4 overflow-hidden rounded-full ring-2 ring-[#f3bc77]/30">
+                  <ContentImage src={getPostImage(featuredListings[1] || featuredListings[0])} alt={(featuredListings[1] || featuredListings[0]) ? `${(featuredListings[1] || featuredListings[0])!.title} preview` : 'Listing preview'} fill className="object-cover opacity-90" />
                 </div>
-              ) : null}
+                <span className="absolute -right-1 bottom-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#f3bc77] text-[#1d1716] shadow-md">
+                  <ShieldCheck className="h-5 w-5" />
+                </span>
+              </div>
             </div>
           </div>
         </div>
+
+        {isPremiumMarket ? (
+          <div
+            aria-hidden
+            className="absolute bottom-0 left-0 right-0 h-16 rounded-t-[3rem] bg-[#faf6f1] sm:h-20 sm:rounded-t-[4rem]"
+          />
+        ) : null}
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between gap-4 border-b border-border pb-6">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Featured businesses</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">Strong listings with clearer trust cues.</h2>
+      {isPremiumMarket ? (
+        <section className="relative z-10 -mt-10 px-4 sm:px-6 lg:px-8">
+          <div className={`mx-auto max-w-7xl p-6 sm:p-8 ${tone.panel}`}>
+            <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">{dh.searchPanelEyebrow}</p>
+                <h2 className={`font-display mt-3 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl ${tone.titleOnLight}`}>
+                  {dh.searchPanelTitle}
+                </h2>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">{dh.searchPanelSubtitle}</p>
+              </div>
+              <div className="flex flex-col gap-4">
+                <form action="/search" method="get" className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                  <input type="hidden" name="master" value="1" />
+                  <input type="hidden" name="task" value="classified" />
+                  <Input
+                    name="q"
+                    placeholder={siteContent.nav.searchPlaceholder}
+                    aria-label={dh.searchKeywordLabel}
+                    className="h-11 flex-1 bg-background"
+                  />
+                  <Button type="submit" className="h-11 shrink-0 sm:px-6">
+                    {siteContent.nav.searchSubmit}
+                  </Button>
+                </form>
+                <form action="/classifieds" method="get" className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                  <label className="sr-only" htmlFor="home-category-filter">
+                    {dh.searchCategoryLabel}
+                  </label>
+                  <select
+                    id="home-category-filter"
+                    name="category"
+                    defaultValue="all"
+                    className="h-11 w-full flex-1 rounded-xl border border-border bg-background px-3 text-sm text-foreground shadow-xs"
+                  >
+                    <option value="all">{dh.searchCategoryAll}</option>
+                    {CATEGORY_OPTIONS.map((item) => (
+                      <option key={item.slug} value={item.slug}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Button type="submit" variant="outline" className="h-11 shrink-0 border-[color:var(--listing-card-border)] sm:px-6">
+                    {dh.searchCategorySubmit}
+                  </Button>
+                </form>
+              </div>
+            </div>
+            <div className="mt-8 grid gap-4 border-t border-border pt-8 sm:grid-cols-2 lg:grid-cols-4">
+              {quickRoutes.map((task) => {
+                const Icon = taskIcons[task.key as TaskKey] || LayoutGrid
+                return (
+                  <Link key={task.key} href={task.route} className={`group flex gap-4 rounded-2xl p-4 transition hover:border-primary/25 ${tone.soft}`}>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <h3 className={`font-display text-lg font-semibold ${tone.titleOnLight}`}>{task.label}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">{task.description}</p>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
-          <Link href={featuredTaskRoute} className="text-sm font-semibold text-primary hover:opacity-80">
-            View all {getTaskConfig(featuredTaskKey)?.label ?? 'posts'}
+        </section>
+      ) : null}
+
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">{dh.latestEyebrow}</p>
+            <h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-4xl">{dh.latestTitle}</h2>
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{dh.latestSubtitle}</p>
+          </div>
+          <Link href={listingsHref} className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-primary/80">
+            View all
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featuredListings.map((post) => (
             <TaskPostCard key={post.id} post={post} href={getTaskHref(featuredTaskKey, post.slug)} taskKey={featuredTaskKey} />
           ))}
@@ -252,12 +323,12 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
       <section className={`${tone.shell}`}>
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
           <div className={`rounded-[2rem] p-7 ${tone.panel}`}>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] opacity-70">What makes this different</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">Built like a business directory, not a recolored content site.</h2>
-            <ul className={`mt-6 space-y-3 text-sm leading-7 ${tone.muted}`}>
-              <li>Search-first hero instead of a magazine headline.</li>
-              <li>Action-oriented listing cards with trust metadata.</li>
-              <li>Support lanes for offers, businesses, and profiles.</li>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">{dh.trustEyebrow}</p>
+            <h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">{dh.trustTitle}</h2>
+            <ul className="mt-6 list-disc space-y-3 pl-5 text-sm leading-relaxed text-muted-foreground">
+              {dh.trustBullets.map((line, i) => (
+                <li key={`trust-${i}`}>{line}</li>
+              ))}
             </ul>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -265,14 +336,17 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
               const meta = getPostMeta(post)
               const taskKey = resolveTaskKey(post.task, profilePosts.length ? 'profile' : 'classified')
               return (
-                <Link key={post.id} href={getTaskHref(taskKey, post.slug)} className={`overflow-hidden rounded-[1.8rem] ${tone.panel}`}>
+                <Link key={post.id} href={getTaskHref(taskKey, post.slug)} className="group overflow-hidden rounded-2xl border border-[color:var(--listing-card-border)] bg-card shadow-[0_16px_48px_rgba(29,23,22,0.07)] ring-1 ring-[color:var(--listing-card-glow)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_56px_rgba(29,23,22,0.11)]">
                   <div className="relative h-44 overflow-hidden">
-                    <ContentImage src={getPostImage(post)} alt={post.title} fill className="object-cover" />
+                    <ContentImage src={getPostImage(post)} alt={post.title} fill className="object-cover transition duration-500 group-hover:scale-[1.03]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1d1716]/45 to-transparent opacity-80" />
+                    <span className="absolute left-3 top-3 rounded-full bg-[#f3bc77] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#1d1716]">
+                      {meta.category || post.task || 'Listing'}
+                    </span>
                   </div>
                   <div className="p-5">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] opacity-70">{meta.category || post.task || 'Profile'}</p>
-                    <h3 className="mt-2 text-xl font-semibold">{post.title}</h3>
-                    <p className={`mt-2 text-sm leading-7 ${tone.muted}`}>{post.summary || 'Quick access to local information and related surfaces.'}</p>
+                    <h3 className="font-display text-xl font-semibold text-foreground">{post.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{post.summary || dh.cardFallbackSummary}</p>
                   </div>
                 </Link>
               )

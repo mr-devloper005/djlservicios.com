@@ -57,19 +57,26 @@ export function Footer() {
 
   if (recipe.footer === 'minimal-footer') {
     return (
-      <footer className="border-t border-[#d7deca] bg-[#f4f6ef] text-[#1f2617]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <footer className="border-t border-[color:var(--listing-card-border)] bg-[linear-gradient(180deg,#402a23_0%,#1d1716_100%)] text-[#faf3eb]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
-            <p className="text-lg font-semibold">{SITE_CONFIG.name}</p>
-            <p className="mt-1 text-sm text-[#56604b]">{SITE_CONFIG.description}</p>
+            <p className="font-display text-xl font-semibold tracking-tight">{SITE_CONFIG.name}</p>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-[#d8cec6]">{SITE_CONFIG.description}</p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             {enabledTasks.slice(0, 5).map((task) => (
-              <Link key={task.key} href={task.route} className="rounded-lg border border-[#d7deca] bg-white px-3 py-2 text-sm font-medium text-[#1f2617] hover:bg-[#ebefdf]">
+              <Link
+                key={task.key}
+                href={task.route}
+                className="rounded-full border border-[#f3bc77]/25 bg-white/5 px-4 py-2 text-sm font-medium text-[#faf3eb] transition hover:border-[#f3bc77]/50 hover:bg-[#f3bc77]/10"
+              >
                 {task.label}
               </Link>
             ))}
           </div>
+        </div>
+        <div className="border-t border-white/10 py-4 text-center text-xs text-[#b5a89e]">
+          &copy; {new Date().getFullYear()} {SITE_CONFIG.name}
         </div>
       </footer>
     )
@@ -83,7 +90,7 @@ export function Footer() {
             <div className="rounded-[2rem] border border-white/10 bg-white/5 p-7">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-white/8 p-1.5">
-                  <img src="/favicon.png?v=20260414" alt={`${SITE_CONFIG.name} logo`} width="48" height="48" className="h-full w-full object-contain" />
+                  <img src="/favicon.png?v=20260408" alt={`${SITE_CONFIG.name} logo`} width="48" height="48" className="h-full w-full object-contain" />
                 </div>
                 <div>
                   <p className="text-lg font-semibold">{SITE_CONFIG.name}</p>
@@ -175,7 +182,7 @@ export function Footer() {
           <div>
             <Link href="/" className="flex items-center gap-3">
               <div className="h-11 w-11 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
-                <img src="/favicon.png?v=20260414" alt={`${SITE_CONFIG.name} logo`} width="44" height="44" className="h-full w-full object-contain" />
+                <img src="/favicon.png?v=20260408" alt={`${SITE_CONFIG.name} logo`} width="44" height="44" className="h-full w-full object-contain" />
               </div>
               <div>
                 <span className="block text-lg font-semibold">{SITE_CONFIG.name}</span>
