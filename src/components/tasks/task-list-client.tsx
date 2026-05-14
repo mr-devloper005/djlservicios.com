@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TaskPostCard } from "@/components/shared/task-post-card";
 import { buildPostUrl } from "@/lib/task-data";
 import { normalizeCategory, isValidCategory } from "@/lib/categories";
 import type { TaskKey } from "@/lib/site-config";
 import type { SitePost } from "@/lib/site-connector";
+import type { LocalPost } from "@/lib/local-posts";
 import { getLocalPostsForTask } from "@/lib/local-posts";
 
 type Props = {
@@ -15,7 +16,11 @@ type Props = {
 };
 
 export function TaskListClient({ task, initialPosts, category }: Props) {
-  const localPosts = getLocalPostsForTask(task);
+  const [localPosts, setLocalPosts] = useState<LocalPost[]>([]);
+
+  useEffect(() => {
+    setLocalPosts(getLocalPostsForTask(task));
+  }, [task]);
 
   const merged = useMemo(() => {
     const bySlug = new Set<string>();

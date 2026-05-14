@@ -36,9 +36,15 @@ export function DirectoryTaskDetailPage({
   const rawPrice = content.price ?? content.asking_price ?? content.amount
   let priceLabel: string | null = null
   if (typeof rawPrice === 'number' && Number.isFinite(rawPrice)) {
-    priceLabel = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(rawPrice)
+    if (rawPrice > 0) {
+      priceLabel = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(rawPrice)
+    }
   } else if (typeof rawPrice === 'string' && rawPrice.trim()) {
-    priceLabel = rawPrice.trim()
+    const trimmed = rawPrice.trim()
+    const numeric = Number(trimmed.replace(/[^0-9.-]/g, ''))
+    if (!Number.isFinite(numeric) || numeric > 0) {
+      priceLabel = trimmed
+    }
   }
   const schemaPayload = {
     '@context': 'https://schema.org',

@@ -24,7 +24,8 @@ const footerLinks = {
     icon: taskIcons[task.key] || LayoutGrid,
   })),
   company: [
-    { name: 'About', href: '/about' },
+    { name: 'About Us', href: '/about' },
+    { name: 'Contact Us', href: '/contact' },
     { name: 'Team', href: '/team' },
     { name: 'Careers', href: '/careers' },
     { name: 'Blog', href: '/blog' },
@@ -40,7 +41,7 @@ const footerLinks = {
     { name: 'Privacy', href: '/privacy' },
     { name: 'Terms', href: '/terms' },
     { name: 'Cookies', href: '/cookies' },
-    { name: 'Licenses', href: '/licenses' },
+    // { name: 'Licenses', href: '/licenses' },
   ],
 }
 
@@ -62,6 +63,28 @@ export function Footer() {
           <div>
             <p className="font-display text-xl font-semibold tracking-tight">{SITE_CONFIG.name}</p>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-[#d8cec6]">{SITE_CONFIG.description}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/about" className="rounded-full border border-[#f3bc77]/25 bg-white/5 px-3 py-1.5 text-xs font-medium text-[#faf3eb] transition hover:border-[#f3bc77]/50 hover:bg-[#f3bc77]/10">
+                About Us
+              </Link>
+              <Link href="/contact" className="rounded-full border border-[#f3bc77]/25 bg-white/5 px-3 py-1.5 text-xs font-medium text-[#faf3eb] transition hover:border-[#f3bc77]/50 hover:bg-[#f3bc77]/10">
+                Contact Us
+              </Link>
+              <Link href="/help" className="rounded-full border border-[#f3bc77]/25 bg-white/5 px-3 py-1.5 text-xs font-medium text-[#faf3eb] transition hover:border-[#f3bc77]/50 hover:bg-[#f3bc77]/10">
+                Help Center
+              </Link>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {footerLinks.legal.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="rounded-full border border-white/15 bg-black/15 px-3 py-1.5 text-xs font-medium text-[#d8cec6] transition hover:border-white/30 hover:text-[#faf3eb]"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {enabledTasks.slice(0, 5).map((task) => (
@@ -131,6 +154,15 @@ export function Footer() {
                     </Link>
                   ))}
                 </div>
+                <ul className="mt-4 space-y-2 text-sm text-slate-300">
+                  {footerLinks.legal.map((item) => (
+                    <li key={item.name}>
+                      <Link href={item.href} className="hover:text-white">
+                        {item.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
@@ -165,6 +197,14 @@ export function Footer() {
               <h4 className="text-xs font-semibold uppercase tracking-[0.24em] text-[#8b6d5a]">Company</h4>
               <ul className="mt-4 space-y-3 text-sm">
                 {footerLinks.company.map((item) => (
+                  <li key={item.name}><Link href={item.href} className="hover:text-[#2f1d16]">{item.name}</Link></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-[0.24em] text-[#8b6d5a]">Legal</h4>
+              <ul className="mt-4 space-y-3 text-sm">
+                {footerLinks.legal.map((item) => (
                   <li key={item.name}><Link href={item.href} className="hover:text-[#2f1d16]">{item.name}</Link></li>
                 ))}
               </ul>
