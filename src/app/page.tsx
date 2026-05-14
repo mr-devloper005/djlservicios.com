@@ -173,10 +173,6 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
         <div className="relative mx-auto max-w-7xl px-4 pb-28 pt-14 sm:px-6 sm:pb-32 sm:pt-16 lg:px-8 lg:pb-36">
           <div className="grid gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
             <div>
-              <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] ${tone.badge}`}>
-                <Compass className="h-3.5 w-3.5" />
-                {dh.heroBadge}
-              </span>
               <h1 className={`font-display mt-6 max-w-3xl text-4xl font-semibold leading-[1.08] tracking-[-0.03em] sm:text-5xl lg:text-[3.25rem] ${tone.title}`}>
                 {dh.heroTitle}
               </h1>
