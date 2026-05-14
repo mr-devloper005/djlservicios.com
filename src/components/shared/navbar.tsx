@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Search, Menu, X, User, FileText, Building2, LayoutGrid, Tag, Image as ImageIcon, ChevronRight, Sparkles, Plus } from 'lucide-react'
+import { Search, Menu, X, User, FileText, Building2, LayoutGrid, Tag, Image as ImageIcon, ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/auth-context'
 import { SITE_CONFIG, type TaskKey } from '@/lib/site-config'
@@ -58,14 +58,6 @@ function NavbarBrandText({ market }: { market: boolean }) {
         )}
       >
         {SITE_CONFIG.name}
-      </span>
-      <span
-        className={cn(
-          'max-w-[12rem] truncate text-[10px] uppercase tracking-[0.2em] sm:max-w-[16rem] sm:text-[11px] md:max-w-none',
-          market ? 'text-[#d8cec6]' : 'text-muted-foreground',
-        )}
-      >
-        {siteContent.navbar.tagline}
       </span>
     </div>
   )
@@ -158,7 +150,7 @@ export function Navbar() {
   const { recipe } = getFactoryState()
   const searchDefaultQ = searchParams.get('q') ?? ''
 
-  const navigation = useMemo(() => SITE_CONFIG.tasks.filter((task) => task.enabled && task.key !== 'profile'), [])
+  const navigation = useMemo(() => SITE_CONFIG.tasks.filter((task) => task.enabled && task.key !== 'profile' && task.key !== 'classified'), [])
   const primaryNavigation = navigation.slice(0, 5)
   const mobileNavigation = navigation.map((task) => ({
     name: task.label,
@@ -242,19 +234,6 @@ export function Navbar() {
           <div className="hidden min-w-0 flex-1 justify-center px-2 lg:flex">{searchForm({})}</div>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            {primaryTask ? (
-              <Link
-                href={primaryTask.route}
-                className={cn(
-                  'hidden items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] md:inline-flex',
-                  isMarketBar ? 'border-[#f3bc77]/35 text-[#e8ddd4] hover:border-[#f3bc77]/55 hover:text-[#f3bc77]' : 'border-current/10 opacity-75',
-                )}
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                {primaryTask.label}
-              </Link>
-            ) : null}
-
             {isAuthenticated ? (
               <NavbarAuthControls />
             ) : (
@@ -376,13 +355,6 @@ export function Navbar() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          {primaryTask && (recipe.navbar === 'utility-bar' || recipe.navbar === 'floating-bar') ? (
-            <Link href={primaryTask.route} className="hidden items-center gap-2 rounded-full border border-current/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] opacity-80 md:inline-flex">
-              <Sparkles className="h-3.5 w-3.5" />
-              {primaryTask.label}
-            </Link>
-          ) : null}
-
           <Button variant="ghost" size="icon" asChild className="hidden rounded-full md:flex">
             <Link href="/search">
               <Search className="h-5 w-5" />

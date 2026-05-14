@@ -38,9 +38,20 @@ const getContent = (post: SitePost): ListingContent => {
 const formatPrice = (content: Record<string, unknown>) => {
   const raw = content.price ?? content.asking_price ?? content.amount
   if (typeof raw === 'number' && Number.isFinite(raw)) {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(raw)
+    if (raw <= 0) return null
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      currencyDisplay: 'symbol',
+      maximumFractionDigits: 0,
+    }).format(raw)
   }
-  if (typeof raw === 'string' && raw.trim()) return raw.trim()
+  if (typeof raw === 'string' && raw.trim()) {
+    const trimmed = raw.trim()
+    const numeric = Number(trimmed.replace(/[^0-9.-]/g, ''))
+    if (Number.isFinite(numeric) && numeric <= 0) return null
+    return trimmed
+  }
   return null
 }
 
@@ -173,14 +184,7 @@ export function TaskPostCard({
               <span className={`rounded-lg px-3 py-1.5 text-lg font-semibold tabular-nums shadow-md sm:text-xl ${cardTone.price}`}>
                 {priceLabel}
               </span>
-            ) : (
-              <span className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[#faf3eb] ring-1 ring-white/25`}>
-                {variant === 'classified' ? 'Ask for price' : 'View terms'}
-              </span>
-            )}
-            <span className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#402a23] shadow-sm">
-              {variant === 'classified' ? 'Classified' : 'Verified'}
-            </span>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-1 flex-col border-t border-[color:var(--listing-card-border)] bg-gradient-to-b from-card to-secondary/40 p-4 sm:p-5">

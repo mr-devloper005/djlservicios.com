@@ -1,118 +1,97 @@
-import { Building2, FileText, Image as ImageIcon, Mail, Phone, Sparkles, Bookmark, Tag } from 'lucide-react'
-import { NavbarShell } from '@/components/shared/navbar-shell'
-import { Footer } from '@/components/shared/footer'
-import { SITE_CONFIG } from '@/lib/site-config'
-import { siteContent } from '@/config/site.content'
-import { getFactoryState } from '@/design/factory/get-factory-state'
-import { getProductKind } from '@/design/factory/get-product-kind'
+import Link from 'next/link';
+import { ArrowRight, CircleHelp, Mail, MessageSquareText, ShieldAlert, ShieldCheck, Store } from 'lucide-react';
 
-function getTone(kind: ReturnType<typeof getProductKind>) {
-  if (kind === 'directory') {
-    return {
-      shell: 'bg-background text-foreground',
-      panel: 'paper-panel border border-[color:var(--listing-card-border)]',
-      soft: 'rounded-2xl border border-[color:var(--listing-card-border)] bg-card/90',
-      muted: 'text-muted-foreground',
-      action: 'bg-[#a55233] text-[#fffefb] hover:bg-[#8e4529]',
-    }
-  }
-  if (kind === 'editorial') {
-    return {
-      shell: 'bg-[#fbf6ee] text-[#241711]',
-      panel: 'border border-[#dcc8b7] bg-[#fffdfa]',
-      soft: 'border border-[#e6d6c8] bg-[#fff4e8]',
-      muted: 'text-[#6e5547]',
-      action: 'bg-[#241711] text-[#fff1e2] hover:bg-[#3a241b]',
-    }
-  }
-  if (kind === 'visual') {
-    return {
-      shell: 'bg-[#07101f] text-white',
-      panel: 'border border-white/10 bg-white/6',
-      soft: 'border border-white/10 bg-white/5',
-      muted: 'text-slate-300',
-      action: 'bg-[#8df0c8] text-[#07111f] hover:bg-[#77dfb8]',
-    }
-  }
-  return {
-    shell: 'bg-[#f7f1ea] text-[#261811]',
-    panel: 'border border-[#ddcdbd] bg-[#fffaf4]',
-    soft: 'border border-[#e8dbce] bg-[#f3e8db]',
-    muted: 'text-[#71574a]',
-    action: 'bg-[#5b2b3b] text-[#fff0f5] hover:bg-[#74364b]',
-  }
-}
+import { ContactLeadForm } from '@/components/shared/contact-lead-form';
+import { Footer } from '@/components/shared/footer';
+import { NavbarShell } from '@/components/shared/navbar-shell';
+import { siteContent } from '@/config/site.content';
+
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'DJL Servicios';
+const contactCopy = siteContent.contact;
+
+const contactHighlights = [
+  { icon: Mail, title: 'Direct response', copy: 'Your message is saved securely and routed to the right team.' },
+  { icon: MessageSquareText, title: 'Clear details', copy: 'Share your requirement, question, or collaboration idea in one place.' },
+  { icon: ShieldCheck, title: 'Reliable follow-up', copy: 'We keep the request record so every conversation stays traceable.' },
+];
 
 export default function ContactPage() {
-  const { recipe } = getFactoryState()
-  const productKind = getProductKind(recipe)
-  const tone = getTone(productKind)
-  const directoryLaneIcons = [Tag, Mail, Phone] as const
-  const lanes =
-    productKind === 'directory'
-      ? siteContent.contact.directoryLanes.map((lane, i) => ({
-          icon: directoryLaneIcons[i] || Building2,
-          title: lane.title,
-          body: lane.body,
-        }))
-      : productKind === 'editorial'
-        ? [
-            { icon: FileText, title: 'Editorial submissions', body: 'Pitch essays, columns, and long-form ideas that fit the publication.' },
-            { icon: Mail, title: 'Newsletter partnerships', body: 'Coordinate sponsorships, collaborations, and issue-level campaigns.' },
-            { icon: Sparkles, title: 'Contributor support', body: 'Get help with voice, formatting, and publication workflow questions.' },
-          ]
-        : productKind === 'visual'
-          ? [
-              { icon: ImageIcon, title: 'Creator collaborations', body: 'Discuss gallery launches, creator features, and visual campaigns.' },
-              { icon: Sparkles, title: 'Licensing and use', body: 'Reach out about usage rights, commercial requests, and visual partnerships.' },
-              { icon: Mail, title: 'Media kits', body: 'Request creator decks, editorial support, or visual feature placement.' },
-            ]
-          : [
-              { icon: Bookmark, title: 'Collection submissions', body: 'Suggest resources, boards, and links that deserve a place in the library.' },
-              { icon: Mail, title: 'Resource partnerships', body: 'Coordinate curation projects, reference pages, and link programs.' },
-              { icon: Sparkles, title: 'Curator support', body: 'Need help organizing shelves, collections, or profile-connected boards?' },
-            ]
-
   return (
-    <div className={`min-h-screen ${tone.shell}`}>
+    <div className="min-h-screen bg-[linear-gradient(180deg,#faf6f1_0%,#efe9e2_55%,#faf6f1_100%)] text-[#1d1716]">
       <NavbarShell />
-      <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] opacity-70">Contact {SITE_CONFIG.name}</p>
-            <h1 className="font-display mt-4 text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">
-              {productKind === 'directory' ? siteContent.contact.directoryTitle : 'Get in touch'}
-            </h1>
-            <p className={`mt-5 max-w-2xl text-sm leading-relaxed ${tone.muted}`}>
-              {productKind === 'directory' ? siteContent.contact.directoryLead : 'Tell us what you need and we will point you in the right direction.'}
-            </p>
-            <div className="mt-8 space-y-4">
-              {lanes.map((lane) => (
-                <div key={lane.title} className={`rounded-[1.6rem] p-5 ${tone.soft}`}>
-                  <lane.icon className="h-5 w-5" />
-                  <h2 className="mt-3 text-xl font-semibold">{lane.title}</h2>
-                  <p className={`mt-2 text-sm leading-7 ${tone.muted}`}>{lane.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+      <main>
+        <section className="relative overflow-hidden px-6 py-16 md:px-10 lg:px-16 lg:py-20">
+          <div className="absolute left-[-8%] top-0 h-72 w-72 rounded-full bg-[#f3bc77]/25 blur-3xl" />
+          <div className="absolute bottom-0 right-[-8%] h-80 w-80 rounded-full bg-[#a55233]/20 blur-3xl" />
 
-          <div className={`rounded-[2rem] p-7 ${tone.panel}`}>
-            <h2 className="font-display text-2xl font-semibold text-foreground">{siteContent.contact.formTitle}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{siteContent.contact.formNote}</p>
-            <form className="mt-6 grid gap-4">
-              <input className="h-12 rounded-xl border border-border bg-background px-4 text-sm" placeholder="Your name" name="name" autoComplete="name" />
-              <input className="h-12 rounded-xl border border-border bg-background px-4 text-sm" placeholder="Email address" name="email" type="email" autoComplete="email" />
-              <input className="h-12 rounded-xl border border-border bg-background px-4 text-sm" placeholder="Subject (e.g. problem with my ad)" name="subject" />
-              <textarea className="min-h-[180px] rounded-xl border border-border bg-background px-4 py-3 text-sm" placeholder="Describe your question or issue. Include your ad title if it is about a listing." name="message" />
-              <button type="submit" className={`inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold ${tone.action}`}>
-                Send message
-              </button>
-            </form>
+          <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.35em] text-[#6b5c54]">Contact us</p>
+              <h1 className="mt-5 max-w-3xl text-5xl font-black leading-[0.95] tracking-[-0.06em] text-[#1d1716] md:text-7xl">
+                {contactCopy.directoryTitle}
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-[#6b5c54]">
+                {contactCopy.directoryLead}
+              </p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                <div className="rounded-3xl border border-[color:var(--listing-card-border)] bg-card p-5 shadow-sm">
+                  <CircleHelp className="h-5 w-5 text-[#a55233]" />
+                  <h2 className="mt-3 text-sm font-black uppercase tracking-[0.12em] text-[#1d1716]">Posting help</h2>
+                  <p className="mt-2 text-sm leading-6 text-[#6b5c54]">Account issues, ad edits, and listing guidance.</p>
+                </div>
+                <div className="rounded-3xl border border-[color:var(--listing-card-border)] bg-card p-5 shadow-sm">
+                  <ShieldAlert className="h-5 w-5 text-[#a55233]" />
+                  <h2 className="mt-3 text-sm font-black uppercase tracking-[0.12em] text-[#1d1716]">Safety reports</h2>
+                  <p className="mt-2 text-sm leading-6 text-[#6b5c54]">Report suspicious content for quick review.</p>
+                </div>
+                <div className="rounded-3xl border border-[color:var(--listing-card-border)] bg-card p-5 shadow-sm">
+                  <Store className="h-5 w-5 text-[#a55233]" />
+                  <h2 className="mt-3 text-sm font-black uppercase tracking-[0.12em] text-[#1d1716]">Business</h2>
+                  <p className="mt-2 text-sm leading-6 text-[#6b5c54]">Partnerships, placement, and local growth support.</p>
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-3xl border border-[color:var(--listing-card-border)] bg-card/90 p-5 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#6b5c54]">Need answers first?</p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Link href="/help" className="inline-flex items-center gap-2 rounded-full bg-[#a55233] px-4 py-2 text-sm font-semibold text-white hover:bg-[#8e4529]">
+                    Help Center <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link href="/classifieds" className="inline-flex items-center gap-2 rounded-full border border-[color:var(--listing-card-border)] bg-white px-4 py-2 text-sm font-semibold text-[#1d1716] hover:bg-[#f7f1ea]">
+                    Browse classifieds
+                  </Link>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-4">
+                {contactHighlights.map((item) => (
+                  <div key={item.title} className="flex gap-4 rounded-3xl border border-[color:var(--listing-card-border)] bg-card/85 p-5 shadow-sm">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1d1716] text-white">
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-black text-[#1d1716]">{item.title}</h2>
+                      <p className="mt-1 text-sm leading-6 text-[#6b5c54]">{item.copy}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-4 rounded-2xl border border-[color:var(--listing-card-border)] bg-card/90 px-5 py-4 text-sm leading-relaxed text-[#6b5c54] shadow-sm">
+                <p className="font-semibold text-[#1d1716]">{contactCopy.formTitle}</p>
+                <p className="mt-1">
+                  {contactCopy.formNote} You are contacting <span className="font-semibold">{siteName}</span>.
+                </p>
+              </div>
+              <ContactLeadForm />
+            </div>
           </div>
         </section>
       </main>
       <Footer />
     </div>
-  )
+  );
 }
