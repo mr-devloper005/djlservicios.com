@@ -3,6 +3,7 @@ import { ArrowRight, Globe, Mail, MapPin, Phone, ShieldCheck, Tag } from 'lucide
 import { ContentImage } from '@/components/shared/content-image'
 import { SchemaJsonLd } from '@/components/seo/schema-jsonld'
 import { TaskPostCard } from '@/components/shared/task-post-card'
+import { RichContent, formatRichHtml } from '@/components/shared/rich-content'
 import type { SitePost } from '@/lib/site-connector'
 import type { TaskKey } from '@/lib/site-config'
 
@@ -27,6 +28,14 @@ export function DirectoryTaskDetailPage({
   mapEmbedUrl: string | null
   related: SitePost[]
 }) {
+  const plainText = (value: string) =>
+    value
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<\/?[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
   const content = post.content && typeof post.content === 'object' ? (post.content as Record<string, unknown>) : {}
   const location = typeof content.address === 'string' ? content.address : typeof content.location === 'string' ? content.location : ''
   const website = typeof content.website === 'string' ? content.website : ''
@@ -50,7 +59,7 @@ export function DirectoryTaskDetailPage({
     '@context': 'https://schema.org',
     '@type': task === 'profile' ? 'Organization' : 'LocalBusiness',
     name: post.title,
-    description,
+    description: plainText(formatRichHtml(description, 'Details coming soon.')),
     image: images[0],
     url: `${taskRoute}/${post.slug}`,
     address: location || undefined,
@@ -60,6 +69,7 @@ export function DirectoryTaskDetailPage({
 
   const panel = 'rounded-2xl border border-[color:var(--listing-card-border)] bg-card shadow-[0_24px_64px_rgba(29,23,22,0.08)] ring-1 ring-[color:var(--listing-card-glow)]'
   const inset = 'rounded-2xl border border-border bg-secondary/50 px-4 py-3 text-sm text-foreground'
+  const descriptionHtml = formatRichHtml(description, 'Details coming soon.')
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -95,7 +105,7 @@ export function DirectoryTaskDetailPage({
             <div className={`mt-8 p-7 ${panel}`}>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">About this {task}</p>
               <h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">Full description and seller details</h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{description}</p>
+              <RichContent html={descriptionHtml} className="mt-4 text-sm leading-relaxed text-muted-foreground" />
               {highlights.length ? (
                 <div className="mt-6 grid gap-3 md:grid-cols-2">
                   {highlights.slice(0, 4).map((item) => (
